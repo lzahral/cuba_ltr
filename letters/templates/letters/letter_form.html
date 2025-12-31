@@ -1,0 +1,189 @@
+{% extends 'base.html' %} {% load static %} {% load widget_tweaks %}
+
+{% block styles %}
+<style>
+        #recipientList {
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #recipientList li {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        #recipientList li:hover {
+            background-color: #f1f3f5;
+        }
+
+        /* ضمیمه‌ها inline */
+        .attachment-card {
+            position: relative;
+            padding: 0.25rem 0.75rem;
+            background-color: #f1f3f5;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .attachment-card button {
+            background: none;
+            border: none;
+            font-size: 0.85rem;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 0;
+        }
+</style>
+
+{% endblock styles %}
+
+
+
+{% block breadcrumb %}
+{% if letter %}
+{% include "components/page_title.html" with title="Reply To "|add:letter.subject home_url="dashboard-01.html" level1="Letters" level2="Add" %}
+{% else %}
+{% include "components/page_title.html" with title="New Mail" home_url="dashboard-01.html" level1="Letters"  level2='Add' %}
+{% endif %}
+{% endblock breadcrumb %}
+
+{% block content %}
+<div class="card height-equal ">
+                  <div class="card-body ">
+                    <form method="POST" class=' row  ps-5'  enctype="multipart/form-data" >
+                        {% csrf_token %}
+                        {% for field in form %} 
+                            <div class=" py-2 px-3 m-0 col-12 ">
+                            <div class='col-2 pt-2 pb-1'>
+                                {{field.label}}
+                            </div>
+                            {% if field.name == 'recipient' %}
+                        <div class="">
+                                <div class="mb-1 position-relative">
+                                    <input type="text" id="recipientSearch" class="form-control">
+                                    <input type="hidden" name="recipient" id="recipientValue">
+                                    <ul id="recipientList" class="list-group position-absolute d-none">
+                                        {% for user in users %}
+                                            <li class="list-group-item list-group-item-action"
+                                                data-id="{{ user.id }}"
+                                                data-name="{{ user.get_full_name|default:user.username }}">
+                                                {{ user.get_full_name|default:user.username }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                        </div>
+                            {% else %}
+                                {{ field|add_class:'form-control col-12'}}
+                            {% endif %} 
+                            {% if field.errors %}
+                                <p class="txt-danger mb-0">{{ field.errors|striptags}}</p> 
+                            {% endif %}
+                            </div>
+                        {% endfor %}
+                         <div id="attachmentList" class="d-flex flex-row flex-wrap gap-2 mb-3  p-1 m-0 ps-3"></div>
+
+                            <div class="col-12 pt-3 text-center">
+                                <button type="submit" name="action" value="send" class="btn btn-primary px-5">Send</button>
+                                {% comment %} <button type="submit" name="action" value="draft" class="btn btn-secondary px-5 ms-2">Save Draft</button> {% endcomment %}
+                            </div>
+                        </form>
+
+                  </div>
+                </div>
+                
+
+                
+{% endblock content %}
+
+
+
+{% block scripts %}
+<script>
+    // ====================== Attachments ======================
+    const fileInput = document.querySelector('input[name="attachments"]');
+    const attachmentList = document.getElementById('attachmentList');
+    let filesArray = [];
+
+    fileInput.addEventListener('change', (e) => {
+        for (let i = 0; i < e.target.files.length; i++) {
+            filesArray.push(e.target.files[i]);
+        }
+        renderAttachmentList();
+    });
+
+    function renderAttachmentList() {
+        attachmentList.innerHTML = '';
+        filesArray.forEach((file, index) => {
+            const div = document.createElement('div');
+            div.className = 'attachment-card project-box';
+
+            const span = document.createElement('span');
+            span.textContent = file.name;
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = '×';
+            btn.addEventListener('click', () => {
+                filesArray.splice(index, 1);
+                renderAttachmentList();
+            });
+
+            div.appendChild(span);
+            div.appendChild(btn);
+            attachmentList.appendChild(div);
+        });
+
+        const dataTransfer = new DataTransfer();
+        filesArray.forEach(f => dataTransfer.items.add(f));
+        fileInput.files = dataTransfer.files;
+    }
+
+    // ====================== Recipient search ======================
+    const searchInput = document.getElementById('recipientSearch');
+    const hiddenInput = document.getElementById('recipientValue');
+    const list = document.getElementById('recipientList');
+    const items = list.querySelectorAll('li');
+
+    searchInput.addEventListener('input', function () {
+        const value = this.value.toLowerCase();
+        let hasResult = false;
+
+        items.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            if (name.includes(value)) {
+                item.classList.remove('d-none');
+                hasResult = true;
+            } else {
+                item.classList.add('d-none');
+            }
+        });
+
+        list.classList.toggle('d-none', !hasResult);
+    });
+
+    items.forEach(item => {
+        item.addEventListener('click', () => {
+            searchInput.value = item.dataset.name;
+            hiddenInput.value = item.dataset.id;
+            list.classList.add('d-none');
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.position-relative')) {
+            list.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock scripts %}
+
+

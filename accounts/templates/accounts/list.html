@@ -1,0 +1,212 @@
+{% extends 'base.html' %} {% load static %} {% block styles %}
+<style>
+  .dt-select-checkbox {
+    display: none !important;
+  }
+  {% comment %} .w-test{
+    width: 150px !important;
+  } {% endcomment %}
+  .image{
+    width: 60px !important;
+    height: 60px !important;
+    margin-right: 25px !important;
+  }
+  .w-45{
+    width: 45px !important;
+  }
+</style>
+{% endblock styles %} 
+{% block breadcrumb %} 
+{% include "components/page_title.html" with title="users" %} 
+{% endblock breadcrumb %} {% block content %}
+<div class="container-fluid candidate-wrapper">
+  <div class="row g-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body candidates-box px-0">
+          <div class="table-responsive custom-scrollbar">
+            <table class="table" id="candidates-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th class="hide"></th>
+                  {% comment %}
+                  <th>Task Name</th>
+                  {% endcomment %}
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone Number</th>
+                  <th>Role</th>
+                  <th></th>
+                  {% comment %}
+                  <th>Action</th>
+                  {% endcomment %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in data %}
+                <tr>
+                  <td></td>
+                  <td class="hide">-{{ item.deadline|date:'Ymd' }}</td>
+                  <td>
+                    <div class="list-wrapper gap-0">
+                        {% if item.avatar.name %}
+                        
+                            <img
+                                class="list-img image "
+                                src="{{item.avatar.url}}"
+                                alt="profile"
+                            />
+                        {% else %}
+                        <div class="rounded-border">
+                            <div class="letter-avatar">
+                                <h6 class="txt-primary bg-light-primary">
+                                {{item.user.first_name|default:item.user.username|first|upper}}{{item.user.last_name|first|upper }}
+                                </h6>
+                                <p class="txt-primary"></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                      <div class="list-content">
+                        <h6>{{item.user.get_full_name}}</h6>
+                      </div>
+                    </div>
+                    {% comment %} {% if item.avatar.url.exists %}
+                    <img
+                      class="col-auto img-100 rounded-circle"
+                      src="{{item.avatar.url}}"
+                      alt="#"
+                    />
+                    {% else %}
+                    <div class="rounded-border">
+                      <div class="letter-avatar">
+                        <h6 class="txt-primary bg-light-primary">
+                          {{
+                          item.user.first_name|default:item.user.username|first|upper}}{{
+                          item.user.last_name|first|upper }}
+                        </h6>
+                        <p class="txt-primary"></p>
+                      </div>
+                    </div>
+                    {% endif %}
+                    <div class="col">{{item.user.get_full_name}}</div>
+                    {% endcomment %}
+                  </td>
+                  <td>
+                    
+                        <h6 class="c-light">
+                          {{ item.user.email }}
+                        </h6>
+                      
+                  </td>
+                  <td class='w-test'>
+                    
+                        <h6 class="c-light">
+                          {{ item.phone_number }}
+                        </h6>
+                     
+                  </td>
+                 
+                  <td class="pe-4 w-45">
+                    {% if item.is_completed %}
+                    <span class="me-3 badge badge-light-success"
+                      >Completed</span
+                    >
+                    {% elif item.is_overdue %}
+                    <span class="me-3 badge badge-light-danger">Overdue</span>
+                    {% else %}
+                    <span class="me-3 badge badge-light-primary"
+                      >{{item.role}}
+                    </span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="d-flex">
+                      {% comment %} <button
+                        class="btn btn-outline-info"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-title="detail"
+                        onclick="location.href='{% url 'task_detail' item.id %}'"
+                      >
+                        <i class="fa-solid px-1 fa-info"></i>
+                      </button> {% endcomment %}
+                      <button
+                        class="btn btn-outline-primary"
+                        onclick="location.href='{% url 'edit_user' item.id %}'"
+                      >
+                        <i class="fa-solid fa-edit"></i>
+                      </button>
+                      <button
+                        class="btn btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#delete_handler"
+                        onclick='set_id("{{item.user.id}}")'
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="modal" id="delete_handler" style="display: none;" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content modal-content-demo">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete User</h5>
+                    {% comment %} <button aria-label="بستن" class="close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">×</span></button> {% endcomment %}
+                </div>
+                <div class="modal-body">
+                    <h6>Do you really want to delete the user?</h6>
+                </div>
+                <div class="modal-footer">
+                  <button onclick='delete_item()' class="btn ripple btn-danger" data-bs-dismiss="modal" type="button">Yes, delete it!</button>
+                    <button class="btn ripple btn-primary" data-bs-dismiss="modal" type="button"> Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% csrf_token %}
+{% endblock content %} 
+
+
+
+{% block scripts %} 
+<script>
+    var item_id = null  
+
+    function set_id(id){
+        console.log(id)
+        item_id= id
+
+    }
+    function delete_item() {
+      const url = "{% url 'delete_user' 0 %}".replace('0', item_id );
+      console.log(url)
+    fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    })
+    .catch(error => {
+        console.log('Error:', error);
+        alert('خطا در حذف .');
+        console.log(error)
+    }); 
+    }
+</script>
+{% endblock scripts %}

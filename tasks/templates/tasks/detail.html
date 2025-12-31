@@ -1,0 +1,553 @@
+{% extends 'base.html' %} {% load static %} {% load humanize %}
+
+{% block styles %}
+  <style>
+    .test{
+        color: transparent;
+        {% comment %} background-color: red; {% endcomment %}
+        width: 120px;
+    }
+    .test2{
+        color: transparent;
+        {% comment %} background-color: red; {% endcomment %}
+        width: 300px;
+    }
+    .back-btn{
+      padding: 5px 10px;
+      font-size: 20px;
+      border: none;
+              {% comment %} margin-top: 2px; {% endcomment %}
+
+    }
+  </style>
+{% endblock styles %}
+
+{% block breadcrumb %} 
+{% include "components/page_title.html" with title="Task Detail" home_url="dashboard-01.html" level1="داشبورد" %} 
+{% endblock breadcrumb %} 
+
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="email-wrap email-main-wrapper">
+      <div class="row">
+        <div class=" box-col-12 p-3">
+            <div class="card main-summary p-4">
+                <div class="card-header card-no-border">
+                    <div class="common-space">
+                        <div class="left-header-content">
+                            <div class='row'>
+                                {% comment %} <div class='col-auto'>
+                                    <button onclick="history.back()"  class=" btn button-light-secondary b-r-8 back-btn"><i  class="fa-solid fa-arrow-left"></i></button>
+                                    
+                                </div> {% endcomment %}
+                                <div class='col'>
+
+                                    <h5>{{item.title}}</h5>
+                                    <p class="m-0 c-o-light">{{item.status_message}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                             {% comment %} <button
+                                  class="btn btn-outline-primary back-btn"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="top"
+                                  data-bs-title="Edit"
+                                  onclick="location.href='{% url 'edit_task' item.id %}'" 
+
+                                >
+                                 <i class="fa-solid fa-edit"></i>
+                                </button>
+                                <button
+                                  class="btn btn-outline-danger back-btn"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="top"
+                                  data-bs-title="Delete"
+                                >
+                                  <i class="fas fa-trash-alt"></i>
+                                </button> {% endcomment %}
+                        {% comment %} <a class="c-o-light" href="{% url 'tasks' %}">View All</a> {% endcomment %}
+                        </div> 
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                <div class="row g-3">
+                    <div class="col-md-12 xl-50 order-md-0 order-1">
+                        <ul class="summary-section">
+                            <li class="p-b-20">
+                            <p>
+                                {{ item.description|linebreaks }}
+                            </p>
+                            </li>
+                            <li>
+                            <ul class="common-space p-t-10">
+                                <li>
+                                <ul>
+                                    <li>
+                                    <p class="mb-1">Creation Date</p>
+                                    <span>{{ item.created_at|date:"d F Y" }}</span>
+                                    </li>
+                                    <li>
+                                    <p class="mb-1">Due Date</p>
+                                    <span>{{ item.deadline|date:"d F Y" }}</span>
+                                    </li>
+                                </ul>
+                                </li>
+                                <li>
+                                <ul>
+                                    <li>
+                                    <p class="mb-1">Assign to</p>
+                                    <span class="">{{ item.assignee.get_full_name }}</span>
+                                    </li>
+                                    <li>
+                                    <p class="mb-1">Status</p>
+                                   {% if item.is_completed %}
+                                        <span class="me-3 badge badge-light-success">Completed</span>
+                                    {% elif item.is_overdue %}
+                                        <span class="me-3 badge badge-light-danger">Overdue</span>
+                                    {% else %}
+                                        <span class="me-3 badge badge-light-primary">In Progress</span>
+                                    {% endif %}
+                                    </li>
+                                </ul>
+                                </li>
+                                <li class=''>
+                                {% if object.attachments.all  %}
+                                <p class="p-t-10 mb-2">Resources</p>
+
+                                {% for attachment in object.attachments.all %}
+                                    <div class="attachment-file common-flex mt-1">
+                                        <div class="common-flex align-items-center">
+                                            <div class="d-block">
+                                                <p>{{ attachment.original_name }}</p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ attachment.file.url }}" download="">
+                                            <i class="fa-solid fa-download f-light"></i>
+                                       </a>
+                                    </div>
+                                    {% comment %} {% if not forloop.last %}
+                                        <br>
+                                    {% endif %} {% endcomment %}
+                                {% endfor %}
+                                {% else %}
+                                    <div class='test2'></div>
+
+                                {% endif %}
+                               
+                                </li>
+                            </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                </div>
+            </div>
+            {% if item.submission %}
+            <div class="card main-summary p-4">
+                <div class="card-header card-no-border">
+                    <div class="common-space">
+                        <div class="left-header-content">
+                            <h5>{% if item.assignee == user %}Your {% endif %} Submission</h5>
+                            {% comment %} <p class="m-0 c-o-light">{{item.status_message}}</p> {% endcomment %}
+                        </div>
+                        {% comment %} <div class="card-header-right-btn">
+                        <a class="c-o-light" href="{% url 'tasks' %}">View All</a>
+                        </div> {% endcomment %}
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                <div class="row g-3">
+                    <div class="col-md-12 xl-50 order-md-0 order-1">
+                        <ul class="summary-section">
+                            <li class="p-b-20">
+                            <p>
+                                {{ item.submission.comment|linebreaks }}
+                            </p>
+                            </li>
+                            <li>
+                            <ul class="common-space p-t-10">
+                                <li>
+                                <ul>
+                                    <li>
+                                    <p class="mb-1">Submission Date</p>
+                                    <span>{{ item.submission.submitted_at|date:"d F Y" }}</span>
+                                    </li>
+                                    
+                                </ul>
+                                </li>
+                                <li>
+                                    <p class="p-t-10 mb-2">Attachment</p>
+                                    {% comment %} {% for attachment in object.attachments.all %} {% endcomment %}
+                                        <div class="attachment-file common-flex mt-1">
+                                            <div class="common-flex align-items-center">
+                                                <div class="d-block">
+                                                    <p>{{  item.submission.original_name }}</p>
+                                                </div>
+                                            </div>
+                                            <a href="{{  item.submission.file.file.url }}" download="">
+                                                <i class="fa-solid fa-download f-light"></i>
+                                        </a>
+                                        </div>
+                                        {% comment %} {% if not forloop.last %}
+                                            <br>
+                                        {% endif %} {% endcomment %}
+                                    {% comment %} {% endfor %} {% endcomment %}
+                                </li>
+                                <li>
+                                    <div class='test'>test</div>
+                                </li>
+                            </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    {% comment %} <div class="col-md-4 xl-50">
+                        <div class="summary-chart-box">
+                            <div id="summary-chart" style="min-height: 218.7px">
+                            <div
+                                id="apexchartsnu2plp47i"
+                                class="apexcharts-canvas apexchartsnu2plp47i apexcharts-theme-light"
+                                style="width: 321px; height: 218.7px"
+                            >
+                                <svg
+                                id="SvgjsSvg3199"
+                                width="321"
+                                height="218.7"
+                                xmlns="http://www.w3.org/2000/svg"
+                                version="1.1"
+                                xmlns:xlink="http://www.w3.org/1999/xlink"
+                                xmlns:svgjs="http://svgjs.dev"
+                                class="apexcharts-svg"
+                                xmlns:data="ApexChartsNS"
+                                transform="translate(10, 0)"
+                                style="background: transparent"
+                                >
+                                <foreignObject x="0" y="0" width="321" height="218.7"
+                                    ><div
+                                    class="apexcharts-legend"
+                                    xmlns="http://www.w3.org/1999/xhtml"
+                                    ></div
+                                ></foreignObject>
+                                <g
+                                    id="SvgjsG3201"
+                                    class="apexcharts-inner apexcharts-graphical"
+                                    transform="translate(53.5, 0)"
+                                >
+                                    <defs id="SvgjsDefs3200">
+                                    <clipPath id="gridRectMasknu2plp47i">
+                                        <rect
+                                        id="SvgjsRect3202"
+                                        width="222"
+                                        height="250"
+                                        x="-4"
+                                        y="-6"
+                                        rx="0"
+                                        ry="0"
+                                        opacity="1"
+                                        stroke-width="0"
+                                        stroke="none"
+                                        stroke-dasharray="0"
+                                        fill="#fff"
+                                        ></rect>
+                                    </clipPath>
+                                    <clipPath id="forecastMasknu2plp47i"></clipPath>
+                                    <clipPath id="nonForecastMasknu2plp47i"></clipPath>
+                                    <clipPath id="gridRectMarkerMasknu2plp47i">
+                                        <rect
+                                        id="SvgjsRect3203"
+                                        width="220"
+                                        height="242"
+                                        x="-2"
+                                        y="-2"
+                                        rx="0"
+                                        ry="0"
+                                        opacity="1"
+                                        stroke-width="0"
+                                        stroke="none"
+                                        stroke-dasharray="0"
+                                        fill="#fff"
+                                        ></rect>
+                                    </clipPath>
+                                    </defs>
+                                    <g id="SvgjsG3204" class="apexcharts-radialbar">
+                                    <g id="SvgjsG3205">
+                                        <g id="SvgjsG3206" class="apexcharts-tracks">
+                                        <g
+                                            id="SvgjsG3207"
+                                            class="apexcharts-radialbar-track apexcharts-track"
+                                            rel="1"
+                                        >
+                                            <path
+                                            id="apexcharts-radialbarTrack-0"
+                                            d="M 108 32.217682926829255 A 75.78231707317074 75.78231707317074 0 1 1 32.217682926829255 108.00000000000001 "
+                                            fill="none"
+                                            fill-opacity="1"
+                                            stroke="rgba(242,242,242,0.85)"
+                                            stroke-opacity="1"
+                                            stroke-linecap="butt"
+                                            stroke-width="12.017353658536587"
+                                            stroke-dasharray="0"
+                                            class="apexcharts-radialbar-area"
+                                            data:pathOrig="M 108 32.217682926829255 A 75.78231707317074 75.78231707317074 0 1 1 32.217682926829255 108.00000000000001 "
+                                            ></path>
+                                        </g>
+                                        <g
+                                            id="SvgjsG3209"
+                                            class="apexcharts-radialbar-track apexcharts-track"
+                                            rel="2"
+                                        >
+                                            <path
+                                            id="apexcharts-radialbarTrack-1"
+                                            d="M 108 49.60670731707316 A 58.39329268292684 58.39329268292684 0 1 1 49.60670731707316 108.00000000000001 "
+                                            fill="none"
+                                            fill-opacity="1"
+                                            stroke="rgba(242,242,242,0.85)"
+                                            stroke-opacity="1"
+                                            stroke-linecap="butt"
+                                            stroke-width="12.017353658536587"
+                                            stroke-dasharray="0"
+                                            class="apexcharts-radialbar-area"
+                                            data:pathOrig="M 108 49.60670731707316 A 58.39329268292684 58.39329268292684 0 1 1 49.60670731707316 108.00000000000001 "
+                                            ></path>
+                                        </g>
+                                        <g
+                                            id="SvgjsG3211"
+                                            class="apexcharts-radialbar-track apexcharts-track"
+                                            rel="3"
+                                        >
+                                            <path
+                                            id="apexcharts-radialbarTrack-2"
+                                            d="M 108 66.99573170731706 A 41.00426829268294 41.00426829268294 0 1 1 66.99573170731706 108 "
+                                            fill="none"
+                                            fill-opacity="1"
+                                            stroke="rgba(242,242,242,0.85)"
+                                            stroke-opacity="1"
+                                            stroke-linecap="butt"
+                                            stroke-width="12.017353658536587"
+                                            stroke-dasharray="0"
+                                            class="apexcharts-radialbar-area"
+                                            data:pathOrig="M 108 66.99573170731706 A 41.00426829268294 41.00426829268294 0 1 1 66.99573170731706 108 "
+                                            ></path>
+                                        </g>
+                                        </g>
+                                        <g id="SvgjsG3213">
+                                        <g
+                                            id="SvgjsG3218"
+                                            class="apexcharts-series apexcharts-radial-series"
+                                            seriesName="Pending"
+                                            rel="1"
+                                            data:realIndex="0"
+                                        >
+                                            <path
+                                            id="SvgjsPath3219"
+                                            d="M 108 32.217682926829255 A 75.78231707317074 75.78231707317074 0 1 1 96.14503376914936 182.84931099645456 "
+                                            fill="none"
+                                            fill-opacity="0.85"
+                                            stroke="rgba(115,102,255,0.85)"
+                                            stroke-opacity="1"
+                                            stroke-linecap="butt"
+                                            stroke-width="12.389024390243904"
+                                            stroke-dasharray="0"
+                                            class="apexcharts-radialbar-area apexcharts-radialbar-slice-0"
+                                            data:angle="189"
+                                            data:value="70"
+                                            index="0"
+                                            j="0"
+                                            data:pathOrig="M 108 32.217682926829255 A 75.78231707317074 75.78231707317074 0 1 1 96.14503376914936 182.84931099645456 "
+                                            ></path>
+                                            <text
+                                            id="SvgjsText3220"
+                                            font-family="Helvetica, Arial, sans-serif"
+                                            x="100"
+                                            y="32.217682926829255"
+                                            text-anchor="end"
+                                            dominant-baseline="middle"
+                                            font-size="12px"
+                                            font-weight="600"
+                                            fill="#373d3f"
+                                            class="apexcharts-text apexcharts-radialbar-label apexcharts-no-click"
+                                            rel="1"
+                                            style="font-family: Helvetica, Arial, sans-serif"
+                                            >
+                                            Pending: 70
+                                            </text>
+                                        </g>
+                                        <g
+                                            id="SvgjsG3221"
+                                            class="apexcharts-series apexcharts-radial-series"
+                                            seriesName="InxProgress"
+                                            rel="2"
+                                            data:realIndex="1"
+                                        >
+                                            <path
+                                            id="SvgjsPath3222"
+                                            d="M 108 49.60670731707316 A 58.39329268292684 58.39329268292684 0 1 1 73.67728372817763 155.24116613799808 "
+                                            fill="none"
+                                            fill-opacity="0.85"
+                                            stroke="rgba(84,186,74,0.85)"
+                                            stroke-opacity="1"
+                                            stroke-linecap="butt"
+                                            stroke-width="12.389024390243904"
+                                            stroke-dasharray="0"
+                                            class="apexcharts-radialbar-area apexcharts-radialbar-slice-1"
+                                            data:angle="216"
+                                            data:value="80"
+                                            index="0"
+                                            j="1"
+                                            data:pathOrig="M 108 49.60670731707316 A 58.39329268292684 58.39329268292684 0 1 1 73.67728372817763 155.24116613799808 "
+                                            ></path>
+                                            <text
+                                            id="SvgjsText3223"
+                                            font-family="Helvetica, Arial, sans-serif"
+                                            x="100"
+                                            y="49.60670731707316"
+                                            text-anchor="end"
+                                            dominant-baseline="middle"
+                                            font-size="12px"
+                                            font-weight="600"
+                                            fill="#373d3f"
+                                            class="apexcharts-text apexcharts-radialbar-label apexcharts-no-click"
+                                            rel="2"
+                                            style="font-family: Helvetica, Arial, sans-serif"
+                                            >
+                                            In Progress: 80
+                                            </text>
+                                        </g>
+                                        <g
+                                            id="SvgjsG3224"
+                                            class="apexcharts-series apexcharts-radial-series"
+                                            seriesName="Completed"
+                                            rel="3"
+                                            data:realIndex="2"
+                                        >
+                                            <path
+                                            id="SvgjsPath3225"
+                                            d="M 108 66.99573170731706 A 41.00426829268294 41.00426829268294 0 1 1 69.98150447069953 123.36046926063406 "
+                                            fill="none"
+                                            fill-opacity="0.85"
+                                            stroke="rgba(255,184,41,0.85)"
+                                            stroke-opacity="1"
+                                            stroke-linecap="butt"
+                                            stroke-width="12.389024390243904"
+                                            stroke-dasharray="0"
+                                            class="apexcharts-radialbar-area apexcharts-radialbar-slice-2"
+                                            data:angle="248"
+                                            data:value="92"
+                                            index="0"
+                                            j="2"
+                                            data:pathOrig="M 108 66.99573170731706 A 41.00426829268294 41.00426829268294 0 1 1 69.98150447069953 123.36046926063406 "
+                                            ></path>
+                                            <text
+                                            id="SvgjsText3226"
+                                            font-family="Helvetica, Arial, sans-serif"
+                                            x="100"
+                                            y="66.99573170731706"
+                                            text-anchor="end"
+                                            dominant-baseline="middle"
+                                            font-size="12px"
+                                            font-weight="600"
+                                            fill="#373d3f"
+                                            class="apexcharts-text apexcharts-radialbar-label apexcharts-no-click"
+                                            rel="3"
+                                            style="font-family: Helvetica, Arial, sans-serif"
+                                            >
+                                            Completed: 92
+                                            </text>
+                                        </g>
+                                        <circle
+                                            id="SvgjsCircle3214"
+                                            r="29.99559146341464"
+                                            cx="108"
+                                            cy="108"
+                                            class="apexcharts-radialbar-hollow"
+                                            fill="transparent"
+                                        ></circle>
+                                        <g
+                                            id="SvgjsG3215"
+                                            class="apexcharts-datalabels-group"
+                                            transform="translate(0, 0) scale(1)"
+                                            style="opacity: 1"
+                                        >
+                                            <text
+                                            id="SvgjsText3216"
+                                            font-family="Rubik, sans-serif"
+                                            x="108"
+                                            y="98"
+                                            text-anchor="middle"
+                                            dominant-baseline="auto"
+                                            font-size="11px"
+                                            font-weight="500"
+                                            fill="#373d3f"
+                                            class="apexcharts-text apexcharts-datalabel-label"
+                                            style="font-family: Rubik, sans-serif"
+                                            >
+                                            80%
+                                            </text>
+                                            <text
+                                            id="SvgjsText3217"
+                                            font-family="Helvetica, Arial, sans-serif"
+                                            x="108"
+                                            y="119"
+                                            text-anchor="middle"
+                                            dominant-baseline="auto"
+                                            font-size="12px"
+                                            font-weight="400"
+                                            fill="#373d3f"
+                                            class="apexcharts-text apexcharts-datalabel-value"
+                                            style="font-family: Helvetica, Arial, sans-serif"
+                                            >
+                                            Completed
+                                            </text>
+                                        </g>
+                                        </g>
+                                    </g>
+                                    </g>
+                                    <line
+                                    id="SvgjsLine3227"
+                                    x1="0"
+                                    y1="0"
+                                    x2="216"
+                                    y2="0"
+                                    stroke="#b6b6b6"
+                                    stroke-dasharray="0"
+                                    stroke-width="1"
+                                    stroke-linecap="butt"
+                                    class="apexcharts-ycrosshairs"
+                                    ></line>
+                                    <line
+                                    id="SvgjsLine3228"
+                                    x1="0"
+                                    y1="0"
+                                    x2="216"
+                                    y2="0"
+                                    stroke-dasharray="0"
+                                    stroke-width="0"
+                                    stroke-linecap="butt"
+                                    class="apexcharts-ycrosshairs-hidden"
+                                    ></line>
+                                </g>
+                                </svg>
+                            </div>
+                            </div>
+                        </div>
+                    </div> {% endcomment %}
+                </div>
+                </div>
+            </div>
+            {% elif item.assignee == user %}
+            <div class="col-12 pt-3 text-center">
+                <button type="submit" class="btn btn-primary px-5" onclick="location.href='{% url 'task_submit' item.id %}'" >Submit</button>
+            </div>
+            {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block scripts %}
+
+
+{% endblock scripts %}

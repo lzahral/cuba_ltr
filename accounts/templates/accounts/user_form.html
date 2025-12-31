@@ -1,0 +1,108 @@
+{% extends 'base.html' %} {% load static %} {% load widget_tweaks %}
+
+{% block styles %}
+    <style>
+        input[type="file"]{
+            {% comment %} display: none; {% endcomment %}
+        }   
+        .hide{
+            display: none
+        }
+        .custom-file-upload{
+            background-color: #0162e8;
+            display: block;
+            text-align: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            position: absolute;
+            left: 90px;
+            top: 115px;
+            }
+        .custom-file-upload i {
+            padding: 7px;
+            font-size: 15px;
+            color:white;
+        }
+        #display-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+    </style>
+{% endblock styles %}
+
+
+
+{% block breadcrumb %}
+{% if object %}
+{% include "components/page_title.html" with title="Edit User" home_url="dashboard-01.html" level1="Letters"  level2='Add' %}
+{% else %}
+{% include "components/page_title.html" with title="new user" home_url="dashboard-01.html" level1="Letters"  level2='Add' %}
+{% endif %}
+{% endblock breadcrumb %}
+
+{% block content %}
+
+<div class="card height-equal ">
+    <div class="card-body ">
+        <form method="POST" class=' row  ps-5'  enctype="multipart/form-data" >
+            {% csrf_token %}
+            {% for field in form %} 
+                <div class=" py-2 px-3 m-0 col-{% if field.name == 'address' or field.name == 'avatar' %}12{% else %}6{% endif %} ">
+                    <div class='col-2 pt-2 pb-1'>
+                        {{field.label}}
+                    </div>
+                {% if field.name == 'avatar' %}
+                    <div class="avatar">
+                        {% comment %} <img class="img-100 rounded-circle" src="{% static 'assets/images/avatar/profile.png' %}" alt="#"> {% endcomment %}
+                    <img class='rounded-circle img-100'id="display-img" alt="" {% if object.id and object.avatar %} src="{{object.avatar.url}}" {% else %}src="{% static 'assets/images/avatar/profile.png' %}"{% endif %}/></div>
+                    <div class='hide'>
+                        {{form.avatar}}
+
+                    </div>
+                    <label for="id_avatar" class="custom-file-upload">
+                        <i class="fa fa-pen"></i> 
+                    </label>    
+                    <div class="m-3 my-auto">
+                </div>
+                {% else %}
+                    {% if field.name == 'address' %}
+                        {{ field|add_class:"form-control col-12" }}
+                    {% else %}
+                        {{ field|add_class:"form-control col-6" }}
+                    {% endif %}
+                {% endif %} 
+                {% if field.errors %}
+                    <p class="txt-danger mb-0">{{ field.errors|striptags}}</p> 
+                {% endif %}
+                </div>
+            {% endfor %}
+                <div id="attachmentList" class="d-flex flex-row flex-wrap gap-2 mb-3  p-1 m-0 ps-3"></div>
+
+                <div class="col-12 pt-3 text-center">
+                    <button type="submit" class="btn btn-primary px-5">Save</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    
+
+                
+{% endblock content %}
+
+
+
+{% block scripts %}
+    <script>
+        const imgInput = document.querySelector("#id_avatar")
+        const displayImg = document.querySelector("#display-img")
+        imgInput.addEventListener('change',
+        (event)=>{
+            const imgObject = event.target.files[0]
+            displayImg.src = URL.createObjectURL(imgObject)})
+    </script>
+{% endblock scripts %}
+

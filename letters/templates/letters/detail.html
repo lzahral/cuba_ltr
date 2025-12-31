@@ -1,0 +1,503 @@
+{% extends 'base.html' %} {% load static %} {% load humanize %}
+
+{% block styles %}
+  <style>
+    .mail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding: 10px 16px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 20px;
+    }
+
+    .mail-header {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      background: #fff;
+      position: sticky;   /*  */
+      top: 0;
+      z-index: 10;
+    }
+
+  .tab {
+      background: none;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      padding-bottom: 8px;
+      position: relative;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: 100%;
+      background: #7367f0;
+    }
+
+    .tab span {
+      background: #ecebff;
+      color: #7367f0;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .search {
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+   {% comment %}
+    .mail-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+  .mail-item {
+    display: flex;
+    align-items: center;        /*  */
+    gap: 14px;
+    padding: 0 16px;
+    height: 96px;               /* */
+    width: 100%;
+    border-bottom: 1px solid #eee;
+    box-sizing: border-box;
+  }
+    .mail-avatar img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+    }
+
+    .mail-name {
+      width: 140px;               /* 🔴  */
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+.mail-content {
+  flex: 1;                    /**/
+  max-width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;    /*  */
+}
+
+    .mail-text {
+      line-height: 1.4;
+      color: #555;
+
+      display: -webkit-box;
+      -webkit-line-clamp: 2;      /* 🔴  */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* Attachments */
+    .mail-attachments {
+      display: flex;
+      gap: 8px;
+        margin-top: 4px;
+
+      flex-wrap: wrap;
+    }
+
+    .attachment {
+      background: #f4f4f4;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    /* Date */
+    .mail-date {
+      width: 80px;                /* 🔴  */
+      text-align: right;
+      font-size: 13px;
+      color: #888;
+    } {% endcomment %}
+
+    .test{
+      display: block !important;
+    }
+  </style>
+{% endblock styles %}
+
+{% block breadcrumb %} 
+{% include "components/page_title.html" with title="Mail Box" home_url="dashboard-01.html" level1="داشبورد" %} 
+{% endblock breadcrumb %} 
+
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="email-wrap email-main-wrapper">
+      <div class="row">
+        
+        {% if object.parent %}
+        <div class='col-sm-12'>
+          <div class="card email-body email-read show">
+            <div class="mail-header-wrapper header-wrapper1">
+              <div class="mail-header1">
+                <div onclick="history.back()" class="light-square">
+                  <i  class="fa-solid fa-arrow-left"></i>
+                </div>
+                <span>{{object.parent.subject}}</span>
+              </div>
+              <div class="mail-body">
+                {% comment %} <div
+                  class="light-square bg-light-danger"
+                  data-bs-toggle="modal"
+                  data-bs-target="#delete_handler"
+                >
+                  <i class="fa-regular fa-trash-can trash-3 text-danger"></i>
+
+                </div> {% endcomment %}
+               
+              </div>
+            </div>
+            <div class="mail-body-wrapper">
+              <div class="user-mail-wrapper">
+                <div class="user-title">
+                  <div>
+                      {% if letter.parent.recipient == user %}
+                        {% if letter.parent.sender.avatar.name %}
+                          <img
+                              class="list-img image "
+                              src="{{letter.parent.sender.avatar.url}}"
+                              alt="profile"
+                          />
+                        {% else %}
+                          <div class="">
+                              <div class="letter-avatar">
+                                  <h6 class="txt-primary bg-light-primary">
+                                    {{ letter.parent.sender.first_name|default:letter.parent.sender.username|first|upper}}{{ letter.parent.sender.last_name|first|upper }}
+                                  </h6>
+                                  <p class="txt-primary"></p>
+                              </div>
+                          </div>
+                        {% endif %}
+                      {% else %}
+                        {% if letter.parent.recipient.avatar.name %}
+                          <img
+                              class="list-img image "
+                              src="{{letter.parent.recipient.avatar.url}}"
+                              alt="profile"
+                          />
+                        {% else %}
+                        <div class="">
+                            <div class="letter-avatar">
+                                <h6 class="txt-primary bg-light-primary">
+                                  {{ letter.parent.recipient.first_name|default:letter.parent.recipient.username|first|upper}}{{ letter.parent.recipient.last_name|first|upper }}
+                                </h6>
+                                <p class="txt-primary"></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                      {% endif %}
+
+                    <div class="dropdown-subtitle">
+                      <p>{% if letter.parent.recipient == user %} 
+                        {{ letter.parent.sender.first_name }} {{ letter.parent.sender.last_name }}
+                        {% else %}
+                        To {{ letter.parent.recipient.first_name }} {{ letter.parent.recipient.last_name }}
+                        {% endif %}</p>
+                      {% comment %} <div class="onhover-dropdown">
+                        <button class="btn p-0 dropdown-button">
+                          To {{ letter.parent.recipient.first_name }} {{ letter.parent.recipient.last_name }}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="feather feather-chevron-down"
+                          >
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                          </svg>
+                        </button>
+                        <div class="inbox-security onhover-show-div">
+                          <p>From: <span>jones &lt;jacobjones3@gmail.com&gt;</span></p>
+                          <p>to: <span>donut.horry@gmail.com</span></p>
+                          <p>reply-to:<span>&lt;jacobjones3@gmail.com&gt;</span></p>
+                          <p>date: <span>Jul 12, 2024, 7:10 AM</span></p>
+                          <p>subject: <span>Important Account Security Update</span></p>
+                          <p>security: <span>standard encryption (TLS)</span></p>
+                        </div>
+                      </div> {% endcomment %}
+                    </div>
+                  </div>
+                  <div class="inbox-options">
+                    <span>
+                        {{ letter.parent.created_at|date:"l d M Y" }}
+                        {% comment %} ({{ letter.parent.created_at|timesince }} ago) {% endcomment %}
+                    </span>
+                  </div>
+                </div>
+                <div class="user-body py-4">
+                    {{ letter.parent.body|linebreaks }}
+                </div>
+                {% if object.parent.attachments.all %}
+                <div class="user-footer">
+                  <div>
+                   <span class="f-light">Attachments</span>
+                  </div>
+                  {% for attachment in object.parent.attachments.all %}
+                  <div class="d-inline-block">
+                    <div class="attachment-file common-flex">
+                      <div class="common-flex align-items-center">
+                        <div class="d-block">
+                          <p>{{ attachment.original_name }}</p>
+                        </div>
+                      </div>
+                      <a href="{{ attachment.file.url }}" download="">
+                        <i class="fa fa-download f-light"></i>
+                      </a>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <div class="send-btn">
+                  {% if object.is_draft %}
+                    <button class="btn btn-primary"  onclick="location.href='{% url 'letter_detail' object.id %}'" >
+                      {% comment %} <i class="fa-solid fa-mail-send"></i> {% endcomment %}
+                      Send
+                    </button>
+                    <button class="btn btn-primary">
+                      {% comment %} <i class="fa-solid fa-mail-send"></i> {% endcomment %}
+                      Edit
+                    </button>
+                  {% else %}
+                    <button class="btn btn-primary" onclick="location.href='{% url 'reply' object.id %}'">
+                      {% comment %} <i class="fa-solid fa-mail-reply"></i> {% endcomment %}
+                      Replay
+                    </button>
+                  {% endif %}
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        <div class='col-sm-12'>
+          <div class="card email-body email-read show">
+            <div class="mail-header-wrapper header-wrapper1">
+              <div class="mail-header1">
+                <div onclick="history.back()" class="light-square">
+                  <i  class="fa-solid fa-arrow-left"></i>
+                </div>
+                <span>{{object.subject}}</span>
+              </div>
+              <div class="mail-body">
+                {% comment %} <div
+                  class="light-square"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  data-bs-title="Bookmark"
+                >
+                  <i class="fa-solid fa-mail-reply"></i>
+                </div> {% endcomment %}
+                {% comment %} <div
+                  class="light-square bg-light-danger"
+                  data-bs-toggle="modal"
+                  data-bs-target="#delete_handler"
+                >
+                  <i class="fa-regular fa-trash-can trash-3 text-danger"></i>
+
+                </div> {% endcomment %}
+               
+              </div>
+            </div>
+            <div class="mail-body-wrapper">
+              <div class="user-mail-wrapper">
+                <div class="user-title">
+                  <div>
+                    {% if letter.recipient == user %}
+                        {% if letter.sender.avatar.name %}
+                          <img
+                              class="list-img image "
+                              src="{{letter.sender.avatar.url}}"
+                              alt="profile"
+                          />
+                        {% else %}
+                          <div class="">
+                              <div class="letter-avatar">
+                                  <h6 class="txt-primary bg-light-primary">
+                                    {{ letter.sender.first_name|default:letter.sender.username|first|upper}}{{ letter.sender.last_name|first|upper }}
+                                  </h6>
+                                  <p class="txt-primary"></p>
+                              </div>
+                          </div>
+                        {% endif %}
+                      {% else %}
+                        {% if letter.recipient.avatar.name %}
+                          <img
+                              class="list-img image "
+                              src="{{letter.recipient.avatar.url}}"
+                              alt="profile"
+                          />
+                        {% else %}
+                        <div class="">
+                            <div class="letter-avatar">
+                                <h6 class="txt-primary bg-light-primary">
+                                  {{ letter.recipient.first_name|default:letter.recipient.username|first|upper}}{{ letter.recipient.last_name|first|upper }}
+                                </h6>
+                                <p class="txt-primary"></p>
+                            </div>
+                        </div>
+                        {% endif %}
+                      {% endif %}
+                    <div class="dropdown-subtitle">
+                      <p>{% if letter.recipient == user %} 
+                        {{ letter.sender.first_name }} {{ letter.sender.last_name }}
+                        {% else %}
+                        To {{ letter.recipient.first_name }} {{ letter.recipient.last_name }}
+                        {% endif %}</p>
+                      {% comment %} <div class="onhover-dropdown">
+                        <button class="btn p-0 dropdown-button">
+                          To {{ letter.recipient.first_name }} {{ letter.recipient.last_name }}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="feather feather-chevron-down"
+                          >
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                          </svg>
+                        </button>
+                        <div class="inbox-security onhover-show-div">
+                          <p>From: <span>jones &lt;jacobjones3@gmail.com&gt;</span></p>
+                          <p>to: <span>donut.horry@gmail.com</span></p>
+                          <p>reply-to:<span>&lt;jacobjones3@gmail.com&gt;</span></p>
+                          <p>date: <span>Jul 12, 2024, 7:10 AM</span></p>
+                          <p>subject: <span>Important Account Security Update</span></p>
+                          <p>security: <span>standard encryption (TLS)</span></p>
+                        </div>
+                      </div> {% endcomment %}
+                    </div>
+                  </div>
+                  <div class="inbox-options">
+                    <span>
+                        {{ letter.created_at|date:"l d M Y" }}
+                        {% comment %} ({{ letter.created_at|timesince }} ago) {% endcomment %}
+                    </span>
+                  </div>
+                </div>
+                <div class="user-body py-4">
+                    {{ letter.body|linebreaks }}
+                </div>
+                {% if object.attachments.all %}
+                <div class="user-footer">
+                  <div>
+                   <span class="f-light">Attachments</span>
+                  </div>
+                  {% for attachment in object.attachments.all %}
+                  <div class="d-inline-block">
+                    <div class="attachment-file common-flex">
+                      <div class="common-flex align-items-center">
+                        <div class="d-block">
+                          <p>{{ attachment.original_name }}</p>
+                        </div>
+                      </div>
+                      <a href="{{ attachment.file.url }}" download="">
+                        <i class="fa fa-download f-light"></i>
+                      </a>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <div class="send-btn">
+                  {% if object.is_draft %}
+                    <button class="btn btn-primary"  onclick="location.href='{% url 'letter_detail' object.id %}'" >
+                      {% comment %} <i class="fa-solid fa-mail-send"></i> {% endcomment %}
+                      Send
+                    </button>
+                    <button class="btn btn-primary">
+                      {% comment %} <i class="fa-solid fa-mail-send"></i> {% endcomment %}
+                      Edit
+                    </button>
+                  {% else %}
+                    <button class="btn btn-primary" onclick="location.href='{% url 'reply' object.id %}'">
+                      {% comment %} <i class="fa-solid fa-mail-reply"></i> {% endcomment %}
+                      Replay
+                    </button>
+                  {% endif %}
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+      <div class="modal" id="delete_handler" style="display: none;" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content modal-content-demo">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Letter</h5>
+                    {% comment %} <button aria-label="بستن" class="close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">×</span></button> {% endcomment %}
+                </div>
+                <div class="modal-body">
+                    <h6>Do you really want to delete the letter?</h6>
+                </div>
+                <div class="modal-footer">
+                  <button onclick='delete_item()' class="btn ripple btn-danger" data-bs-dismiss="modal" type="button">Yes, delete it!</button>
+                    <button class="btn ripple btn-primary" data-bs-dismiss="modal" type="button"> cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% csrf_token %}
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+    function delete_item() {
+      const url = "{% url 'letter_delete' 0 %}".replace('0', {{object.id}} );
+      console.log(url)
+    fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    })
+    .catch(error => {
+        console.log('Error:', error);
+        alert('خطا در حذف .');
+        console.log(error)
+    }); 
+    }
+</script>
+
+
+{% endblock scripts %}

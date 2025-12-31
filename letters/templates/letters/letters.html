@@ -1,0 +1,464 @@
+{% extends 'base.html' %} {% load static %} 
+{% block styles %}
+  <style>
+    .mail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      padding: 10px 16px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 20px;
+    }
+
+    .mail-header {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      background: #fff;
+      position: sticky;   /*  */
+      top: 0;
+      z-index: 1;
+    }
+
+    .tab {
+        background: none;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        padding-bottom: 8px;
+        position: relative;
+      }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: 100%;
+      background: #7367f0;
+    }
+
+    .tab span {
+      background: #ecebff;
+      color: #7367f0;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .search {
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+
+    .test{
+      display: block !important;
+    }
+  </style>
+{% endblock styles %}
+
+{% block breadcrumb %} 
+{% include "components/page_title.html" with title="Mail Box" home_url="dashboard-01.html" level1="داشبورد" %} 
+{% endblock breadcrumb %} 
+
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="email-wrap email-main-wrapper">
+      <div class="row">
+        
+        <div class="col-sm-12">
+          {% comment %} <div class="card p-0"> {% endcomment %}
+            <div class=" p-0 pt-3 test-box card email-body email-list">
+                <div class="mail-header">
+                  <div class="tabs">
+                    <button class="tab active" onclick="setTab('inbox')">Inbox</button>
+                    <button class="tab" onclick="setTab('sent')">Sent</button>
+                    {% comment %} <button class="tab" onclick="setTab('draft')">Draft</button> {% endcomment %}
+                    <button class="tab" onclick="setTab('trash')">Trash</button>
+                  </div>
+                </div>
+
+                <!-- MAIL LIST -->
+                 <div class='tab-content block-wrapper position-relative'>
+                <div class='tab-pane fade show active'>
+                  <div class="mail-body-wrapper">
+                    <ul class="mail-list mail-header-tabs" id="mailList">
+                      {% if categories.inbox %}
+                        {% for  letter in categories.inbox %}
+                          <li  onclick="location.href='{% url 'letter_detail' letter.id %}'" class="mail-item inbox-data project {% if forloop.last %}border-bottom-0{% endif %}" data-type="inbox">
+                            <div class="ps-3 inbox-user">
+                              <div class="rounded-border">
+                                <div><p class="txt-primary">   
+                                  {{ letter.sender.first_name|default:letter.sender.username|first|upper}}{{ letter.sender.last_name|first|upper }}
+                                </p></div>
+                              </div>
+                              <p> {{ letter.sender.first_name }} {{ letter.sender.last_name }}</p>
+                            </div>
+
+                            <div class="inbox-message">
+                              <div class="email-data">
+                                <span>
+                                  {{letter.subject}}
+                                  <span>{{ letter.body|linebreaksbr|striptags|truncatechars:80 }}</span>
+                                </span>
+                                {% for attachment in letter.attachments.all %}
+                                  <div class="badge badge-light-light"> {{ attachment.original_name}}</div>
+                                {% endfor %}
+                              </div>
+                              <div class="email-timing"><span>
+                                {% now "Y-m-d" as today %}
+                                {% now "Y" as current_year %}
+                                  {% if letter.created_at|date:"Y-m-d" == today %}
+                                    {{ letter.created_at|time:"H:i" }}
+                                  
+                                  {% elif letter.created_at|date:"Y" == current_year %}
+                                    {{ letter.created_at|date:"d M" }} 
+                                  
+                                  {% else %}
+                                    {{ letter.created_at|date:"Y/m/d" }}
+                                  {% endif %}
+                              </span></div>
+                              <div class="email-options" onclick="openDeleteModal(event, {{ letter.id }})">
+                                <i class="fa-regular fa-trash-can trash-3"></i>
+                              </div>
+                            </div>
+                          </li>
+                        {% endfor %}
+                      {% else %}
+                        <li class='mail-item border-bottom-0 p-3' data-type="inbox">
+                          <p class='p-3'>nothing</p>
+                        </li>
+                      {% endif %}
+
+                      {% if categories.sent %}
+                        {% for  letter in categories.sent %}
+                          <li  onclick="location.href='{% url 'letter_detail' letter.id %}'" class="mail-item inbox-data project {% if forloop.last %}border-bottom-0{% endif %}" data-type="sent">
+                            <div class="inbox-user">
+                              <p class='ps-3'>To: </p>
+                              <div class="rounded-border">
+                                <div><p class="txt-primary">   
+                                  {{ letter.recipient.first_name|default:letter.recipient.username|first|upper}}{{ letter.recipient.last_name|first|upper }}
+                                </p></div>
+                              </div>
+                              <p> {{ letter.recipient.first_name }} {{ letter.recipient.last_name }}</p>
+                            </div>
+
+                            <div class="inbox-message">
+                              <div class="email-data">
+                                <span>
+                                  {{letter.subject}}
+                                  <span>{{ letter.body|linebreaksbr|striptags|truncatechars:80 }}</span>
+                                </span>
+                                {% for attachment in letter.attachments.all %}
+                                  <div class="badge badge-light-light"> {{ attachment.original_name }}</div>
+                                {% endfor %}
+                              </div>
+                              <div class="email-timing"><span>
+                                {% now "Y-m-d" as today %}
+                                {% now "Y" as current_year %}
+                                  {% if letter.created_at|date:"Y-m-d" == today %}
+                                    {{ letter.created_at|time:"H:i" }}
+                                  
+                                  {% elif letter.created_at|date:"Y" == current_year %}
+                                    {{ letter.created_at|date:"d M" }} 
+                                  
+                                  {% else %}
+                                    {{ letter.created_at|date:"Y/m/d" }}
+                                  {% endif %}
+                              </span></div>
+                              <div class="email-options" onclick="openDeleteModal(event, {{ letter.id }})">
+                                <i class="fa-regular fa-trash-can trash-3"></i>
+                              </div>
+                            </div>
+
+                        
+                            
+                          </li>
+                        {% endfor %}
+                      {% else %}
+                        <li class='mail-item border-bottom-0 p-3' data-type="sent">
+                          <p class='p-3'>nothing</p>
+                        </li>
+                      {% endif %}
+
+                      {% comment %} {% if categories.draft %}
+                        {% for  letter in categories.draft %}
+                          <li  onclick="location.href='{% url 'letter_detail' letter.id %}'" class="mail-item inbox-data project {% if forloop.last %}border-bottom-0{% endif %}" data-type="draft">
+                            <div class="inbox-user">
+                              <p class='ps-3'>To: </p>
+                              {% if letter.recipient %} 
+                              <div class="rounded-border">
+                                <div><p class="txt-primary"> 
+                                  
+                                  {{ letter.recipient.first_name|default:letter.recipient.username|first|upper}}{{ letter.recipient.last_name|first|upper }}
+                                
+                                  
+                                </p></div>
+                              </div>
+                              {% else %}
+                              <p class='px-5'></p>
+                              {% endif %} 
+                              <p> 
+                                {% if letter.recipient %} {{ letter.recipient.first_name }} {{ letter.recipient.last_name }}{% else %}-{% endif %} 
+                              </p>
+                            </div>
+
+                            <div class="inbox-message">
+                              <div class="email-data">
+                                <span>
+                                  {{letter.subject|default:'-'}}
+                                  <span>{{ letter.body|linebreaksbr|striptags|truncatechars:80|default:'-' }}</span>
+                                </span>
+                                {% for attachment in letter.attachments.all %}
+                                  <div class="badge badge-light-light"> {{ attachment.file.name|cut:"letters/attachments/" }}</div>
+                                {% endfor %}
+                              </div>
+                              <div class="email-timing"><span>
+                                {% now "Y-m-d" as today %}
+                                {% now "Y" as current_year %}
+                                  {% if letter.created_at|date:"Y-m-d" == today %}
+                                    {{ letter.created_at|time:"H:i" }}
+                                  
+                                  {% elif letter.created_at|date:"Y" == current_year %}
+                                    {{ letter.created_at|date:"d M" }} 
+                                  
+                                  {% else %}
+                                    {{ letter.created_at|date:"Y/m/d" }}
+                                  {% endif %}
+                              </span></div>
+                              <div class="email-options">
+                                <i class="fa-regular fa-trash-can trash-3"></i>
+                              </div>
+                            </div>
+
+                        
+                            
+                          </li>
+                        {% endfor %}
+                      {% else %}
+                        <li class='mail-item border-bottom-0 p-3' data-type="inbox">
+                          <p class='p-3'>nothing</p>
+                        </li>
+                      {% endif %} {% endcomment %}
+
+                      {% if categories.trash %}
+                        {% for  letter in categories.trash %}
+                          <li  onclick="location.href='{% url 'letter_detail' letter.id %}'" class="mail-item inbox-data project {% if forloop.last %}border-bottom-0{% endif %}" data-type="trash">
+                            {% if letter.sender == user %}
+                            <div class="inbox-user">
+                              <p class='ps-3'>To: </p>
+                              <div class="rounded-border">
+                                <div><p class="txt-primary">   
+                                  {{ letter.recipient.first_name|default:letter.recipient.username|first|upper}}{{ letter.recipient.last_name|first|upper }}
+                                </p></div>
+                              </div>
+                              <p> {{ letter.recipient.first_name }} {{ letter.recipient.last_name }}</p>
+                            </div>
+                            {% else %}
+                            <div class="inbox-user">
+                              <p class='ps-3'> </p>
+                              <div class="rounded-border">
+                                <div><p class="txt-primary">   
+                                  {{ letter.sender.first_name|default:letter.sender.username|first|upper}}{{ letter.sender.last_name|first|upper }}
+                                </p></div>
+                              </div>
+                              <p> {{ letter.sender.first_name }} {{ letter.sender.last_name }}</p>
+                            </div>
+                            {% endif %}
+
+                            <div class="inbox-message">
+                              <div class="email-data">
+                                <span>
+                                  {{letter.subject}}
+                                  <span>{{ letter.body|linebreaksbr|striptags|truncatechars:80 }}</span>
+                                </span>
+                                {% for attachment in letter.attachments.all %}
+                                  <div class="badge badge-light-light"> {{ attachment.original_name}}</div>
+                                {% endfor %}
+                              </div>
+                              <div class="email-timing"><span>
+                                {% now "Y-m-d" as today %}
+                                {% now "Y" as current_year %}
+                                  {% if letter.created_at|date:"Y-m-d" == today %}
+                                    {{ letter.created_at|time:"H:i" }}
+                                  
+                                  {% elif letter.created_at|date:"Y" == current_year %}
+                                    {{ letter.created_at|date:"d M" }} 
+                                  
+                                  {% else %}
+                                    {{ letter.created_at|date:"Y/m/d" }}
+                                  {% endif %}
+                              </span></div>
+                                <div class="email-options" onclick="undoDelete(event, {{ letter.id }})">
+                                  <i class="fas fa-undo"></i>
+                                </div>
+                            </div>
+
+                        
+                            
+                          </li>
+                        {% endfor %}
+                      {% else %}
+                        <li class='mail-item border-bottom-0 p-3' data-type="trash">
+                          <p class='p-3'>nothing</p>
+                        </li>
+                      {% endif %}
+                    </ul>
+                  </div>
+                </div></div>
+
+
+
+            </div>
+          {% comment %} </div> {% endcomment %}
+        </div>
+
+        
+      </div>
+    </div>
+  </div>
+    <div class="modal fade" id="delete_handler" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete Letter</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p>Do you really want to delete this letter?</p>
+      </div>
+
+      <div class="modal-footer">
+        <button onclick="confirmDelete()" class="btn ripple btn-danger">
+          Yes, delete it!
+        </button>
+        <button class="btn ripple btn-primary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    {% csrf_token %}
+{% endblock content %}
+
+{% block scripts %}
+
+<script>
+  let currentTab = 'inbox'
+
+  const mails = document.querySelectorAll('.mail-item')
+  const tabs = document.querySelectorAll('.tab')
+
+  function setTab(tab) {
+    currentTab = tab
+
+    // active tab
+    tabs.forEach(t => t.classList.remove('active'))
+    event.target.classList.add('active')
+
+    render()
+  }
+
+  function render() {
+    mails.forEach(mail => {
+      mail.style.display =
+        mail.dataset.type === currentTab ? 'flex' : 'none'
+    })
+  }
+
+  render()
+
+  function readLetter(){
+
+  }
+</script>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // آیا این کوکی با name شروع می‌شود؟
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function undoDelete(e, letterId) {
+    e.stopPropagation(); // جلوگیری از کلیک والد
+
+    // استفاده از URL دینامیک
+    const url = "{% url 'letter_delete' 0 %}".replace('0', letterId);
+    const csrftoken = getCookie('csrftoken');
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json",
+        },
+    })
+    .then(res => {
+        if (res.ok) {
+            // بعد از حذف، صفحه را ریلود می‌کنیم
+            window.location.reload();
+        } else {
+            alert("خطا در حذف پیام");
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+
+</script>
+<script>
+let selectedLetterId = null;
+
+function openDeleteModal(e, letterId) {
+    e.stopPropagation(); // جلوگیری از کلیک والد
+    e.preventDefault();    // ⛔ جلوگیری از رفتار پیش‌فرض
+
+    selectedLetterId = letterId;
+
+    const modal = new bootstrap.Modal(document.getElementById('delete_handler'));
+    modal.show();
+}
+
+function confirmDelete() {
+    if (!selectedLetterId) return;
+
+    const url = "{% url 'letter_delete' 0 %}".replace('0', selectedLetterId);
+    const csrftoken = getCookie('csrftoken');
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+        },
+    })
+    .then(res => {
+        if (res.ok) {
+            window.location.reload();
+        } else {
+            alert("Error deleting letter");
+        }
+    })
+    .catch(err => console.error(err));
+}
+</script>
+
+{% endblock scripts %}
