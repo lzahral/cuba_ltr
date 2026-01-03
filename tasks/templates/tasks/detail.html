@@ -178,6 +178,7 @@
                                 </ul>
                                 </li>
                                 <li>
+                                    {% if item.submission.file %}
                                     <p class="p-t-10 mb-2">Attachment</p>
                                     {% comment %} {% for attachment in object.attachments.all %} {% endcomment %}
                                         <div class="attachment-file common-flex mt-1">
@@ -188,8 +189,10 @@
                                             </div>
                                             <a href="{{  item.submission.file.file.url }}" download="">
                                                 <i class="fa-solid fa-download f-light"></i>
+                                                
                                         </a>
                                         </div>
+                                        {% endif %}
                                         {% comment %} {% if not forloop.last %}
                                             <br>
                                         {% endif %} {% endcomment %}

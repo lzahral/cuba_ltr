@@ -722,14 +722,14 @@
                      <span>Tasks</span></a
                     >
                   </li>
-                  {% endif %}
-                  {% if user.profile.role == 'admin' %}
                   <li class="sidebar-list">
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'new_task' %}">
                       <i class="fa-solid fa-plus "></i>
                       <span>New Task</span>
                     </a >
                   </li>
+                  {% endif %}
+                  {% if user.profile.role == 'admin' %}
                   <li class="sidebar-list">
                     <a
                       class="sidebar-link sidebar-title link-nav"
