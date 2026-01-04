@@ -101,6 +101,11 @@
     <link href="{% static 'assets/css/color-6.css'%}" rel="stylesheet" />
     <link href="{% static 'assets/css/responsive.css'%}" rel="stylesheet" />
     <link href="{% static 'assets/css/style.css'%}" rel="stylesheet" />
+    <style>
+      .title-img{
+        width: 350px;
+      }
+    </style>
   </head>
   <body>
     <!-- login page start-->
@@ -112,7 +117,7 @@
               <div>
                 <a class="logo" href="index.html"
                   ><img
-                    class="img-fluid for-light"
+                    class="img-fluid for-light title-img"
                     src="{% static 'assets/images/logo/logo.png'%}"
                     alt="looginpage" /><img
                     class="img-fluid for-dark"
@@ -132,8 +137,6 @@
                       class="form-control"
                       type="email"
                       name="username"
-                      placeholder="test@gmail.com"
-                      value="test@gmail.com"
                     />
                   </div>
                   {% if form.username.errors %}
@@ -146,7 +149,6 @@
                         class="form-control"
                         type="password"
                         name="login[password]"
-                        placeholder="****"
                       />
                       <div class="show-hide"><span class="show"> </span></div>
                     </div>
