@@ -1,0 +1,143 @@
+{% extends 'base.html' %} {% load static %} 
+{% block styles %}
+<style>
+    .dt-select-checkbox {
+    display: none !important;
+}
+</style>
+{% endblock styles %}
+
+{% block breadcrumb %} 
+{% include "components/page_title.html" with title="Tasks" home_url="dashboard-01.html" level1="داشبورد" %} 
+{% endblock breadcrumb %} 
+
+
+{% block content %}
+  <div class="container-fluid candidate-wrapper">
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body candidates-box px-0">
+            <div class="table-responsive custom-scrollbar">
+              <table class="table" id="candidates-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th class='hide'></th>
+                    {% comment %} <th>Task Name</th> {% endcomment %}
+                    <th>Task Details</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th></th>
+                    {% comment %} <th>Action</th> {% endcomment %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in data %}
+                  <tr>
+                    <td></td>                         
+                    <td  class='hide'>-{{ item.deadline|date:'Ymd'  }}</td>
+                    <td>
+                      <div class="common-flex align-items-center">
+                        
+                        <div>
+                          <a class="f-w-500" href="#!">{{item.title}}</a>
+                          {% comment %} <p>{{ item.description|linebreaksbr|striptags}}</p> {% endcomment %}
+                          <p>{{ item.description|linebreaksbr|striptags|truncatechars:100 }}</p>
+                        </div>
+                      </div>
+                      <div class="common-f-start">
+                        {% for attachment in item.attachments.all %}
+                          <div class="attachment">
+                            <i class="fa-solid fa-paperclip"></i>
+                            <span>{{ attachment.original_name }}</span>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </td>
+                    <td>
+                      <ul class="educations">
+                        <li>
+                          <p class="mb-0">
+                            {{ item.deadline|date:"d F Y" }}
+                          </p>
+                        </li>
+                      </ul>
+                    </td>
+                    <td class='pe-4'>
+                      {% if item.is_completed %}
+                        <span class="me-3 badge badge-light-success">Completed</span>
+                      {% elif item.is_overdue %}
+                        <span class="me-3 badge badge-light-danger">Overdue</span>
+                        {% else %}
+                        <span class="me-3 badge badge-light-primary">In Progress</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex">
+                        
+                        <button
+                          class="btn btn-outline-info"
+                          onclick="location.href='{% url 'task_detail' item.id %}'" 
+                        >
+                          <i class="fa-solid px-1 fa-info"></i>
+                        </button>
+                        {% if not item.submission %}
+                        <button
+                          class="btn btn-outline-primary"
+                          onclick="location.href='{% url 'task_submit' item.id %}'"
+
+                        >
+                          <i class="fa-solid fa-edit"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% csrf_token %}
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    var item_id = null  
+
+    function set_id(id){
+        console.log(id)
+        item_id= id
+
+    }
+    function delete_item() {
+      const url = "{% url 'delete_task' 0 %}".replace('0', item_id );
+      console.log(url)
+    fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    })
+    .catch(error => {
+        console.log('Error:', error);
+        alert('خطا در حذف .');
+        console.log(error)
+    }); 
+    }
+</script>
+
+
+
+{% endblock scripts %}

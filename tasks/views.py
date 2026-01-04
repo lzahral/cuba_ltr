@@ -76,9 +76,9 @@ class TaskDetailView(DetailView):
     def get_queryset(self):
         return super().get_queryset().prefetch_related("attachments")
     
-class TaskListView(LoginRequiredMixin, ListView):
+class TodoTaskListView(LoginRequiredMixin, ListView):
     model = Task
-    template_name = "tasks/tasks.html"
+    template_name = "tasks/todo_tasks.html"
     context_object_name = "data"
     paginate_by = 10
 
@@ -86,10 +86,24 @@ class TaskListView(LoginRequiredMixin, ListView):
         user = self.request.user
 
         return Task.objects.filter(
-            Q(creator=user) | Q(assignee=user)
+             Q(assignee=user)
         ).select_related(
             "creator", "assignee"
         ).order_by("-deadline")
+User = get_user_model()
+
+class AssignedTaskListView(LoginRequiredMixin, ListView):
+    model = Task
+    template_name = "tasks/assigned_tasks.html"
+    context_object_name = "data"
+    paginate_by = 10
+
+    def get_queryset(self):
+        user = self.request.user
+
+        return Task.objects.filter(
+        creator=user
+        )
 User = get_user_model()
 
 def index(request):

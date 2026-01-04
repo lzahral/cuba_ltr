@@ -16,7 +16,7 @@
         show: false,
       },
     },
-    colors: ["#7366FF"],
+    colors: ["#fbb52b"],
     stroke: {
       width: 3,
       curve: "smooth",
@@ -61,7 +61,7 @@
       type: "gradient",
       gradient: {
         shade: "dark",
-        gradientToColors: ["#7366FF"],
+        gradientToColors: ["#fbb52b"],
         shadeIntensity: 1,
         type: "horizontal",
         opacityFrom: 1,
@@ -74,7 +74,7 @@
           },
           {
             offset: 100,
-            color: "#7366FF",
+            color: "#fbb52b",
             opacity: 1,
           },
         ],
@@ -395,7 +395,7 @@
         colorStops: [
           {
             offset: 0,
-            color: "#7366FF",
+            color: "#fbb52b",
             opacity: 1,
           },
         ],
@@ -493,7 +493,7 @@
         top: 10,
         left: 0,
         blur: 4,
-        color: "#7366FF",
+        color: "#fbb52b",
         opacity: 0.2,
       },
     },
@@ -507,7 +507,7 @@
         columnWidth: "30%",
       },
     },
-    colors: ["var(--chart-progress-light)", "#ffb829", "#7366FF"],
+    colors: ["var(--chart-progress-light)", "#ffb829", "#fbb52b"],
     fill: {
       type: "solid",
       gradient: {

@@ -6,21 +6,28 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
+    {% comment %} <meta
       name="description"
       content="Cuba admin is super flexible, powerful, clean &amp; modern responsive bootstrap 5 admin template with unlimited possibilities."
     />
     <meta
       name="keywords"
       content="admin template, Cuba admin template, dashboard template, flat admin template, responsive admin template, web app"
-    />
-    <meta name="author" content="pixelstrap" />
-    <link rel="icon" href="{% static 'assets/images/favicon.png' %}" type="image/x-icon" />
-    <link
-      rel="shortcut icon"
-      href="{% static 'assets/images/favicon.png' %}"
-      type="image/x-icon"
-    />
+    /> {% endcomment %}
+    <meta name="author" content="BLACKBOX" />
+    <link rel="apple-touch-icon" sizes="180x180"
+          href="{% static 'assets/favicon/apple-touch-icon.png' %}">
+
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="{% static 'assets/favicon/favicon-32x32.png' %}">
+
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="{% static 'assets/favicon/favicon-16x16.png' %}">
+
+    <link rel="manifest"
+          href="{% static 'assets/favicon/site.webmanifest' %}">
+
+    <link rel="icon" href="{% static 'assets/favicon/favicon.ico' %}">
     <!-- Google font-->
     <link
       href="https://fonts.googleapis.com/css?family=Rubik:400,400i,500,500i,700,700i&amp;display=swap"
@@ -149,7 +156,16 @@
           font-size: 20px;
           margin-right:4px!important;
       }
+      .cog-click{
+        display: none!important;
+      }
+      .grip-click{
+        display: none!important;
+      }
     </style>
+    <title>
+      MAD Mail Service
+    </title>
   </head>
   <body onload="startTime()">
     <!-- loader starts-->
@@ -201,7 +217,7 @@
           </form>
           <div class="header-logo-wrapper col-auto p-0">
             <div class="logo-wrapper">
-              <a href="index.html"
+              <a 
                 ><img
                   class="img-fluid for-light"
                   src="{% static 'assets/images/logo/logo.png' %}" 
@@ -655,8 +671,8 @@
         <div class="sidebar-wrapper" data-sidebar-layout="stroke-svg">
           <div>
             
-            <div class="logo-icon-wrapper p-4">
-              <a href="index.html"
+            <div class="logo-icon-wrapper p-3">
+              <a 
                 ><img
                   class="img-fluid"
                   src="{% static 'assets/images/logo/logo.png'%}"
@@ -670,7 +686,7 @@
               <div id="sidebar-menu">
                 <ul class="sidebar-links pb-5" id="simple-bar">
                   <li class="back-btn">
-                    <a href="index.html"
+                    <a 
                       ><img
                         class="img-fluid"
                         src="../assets/images/logo/logo-icon.png"
@@ -714,20 +730,24 @@
                     </a >
                   </li>
                   {% if user.profile.role == 'admin' or user.profile.role == 'staff' %}
-                  <li class="sidebar-list">
-                    <a
-                      class="sidebar-link sidebar-title link-nav"
-                      href="{% url 'tasks' %}">
-                      <i class="fa-solid fa-list-check "></i>
-                     <span>Tasks</span></a
-                    >
-                  </li>
-                  <li class="sidebar-list">
-                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'new_task' %}">
-                      <i class="fa-solid fa-plus "></i>
-                      <span>New Task</span>
-                    </a >
-                  </li>
+                    <li class="sidebar-list">
+                      <a class="sidebar-link sidebar-title" href="#">
+                        <i class="fa-solid fa-list-check "></i>
+                        <span>Tasks </span>
+                        <div class="according-menu"><i class="fa-solid fa-angle-right"></i></div>
+                      </a>
+                      <ul class="sidebar-submenu" style="display: none">
+                        <li><a href="{% url 'todo_tasks' %}">Todo</a></li>
+                        <li><a href="{% url 'assigned_tasks' %}">Assigned</a></li>
+                      </ul>
+                    </li>
+                    <li class="sidebar-list">
+                      <a class="sidebar-link sidebar-title link-nav" href="{% url 'new_task' %}">
+                        <i class="fa-solid fa-plus "></i>
+                        <span>New Task</span>
+                      </a >
+                    </li>
+                  
                   {% endif %}
                   {% if user.profile.role == 'admin' %}
                   <li class="sidebar-list">
@@ -788,8 +808,8 @@
             <div class="row">
               <div class="col-md-12 footer-copyright text-center">
                 <p class="mb-0">
-                  Copyright <span class="year-update"> </span> © Cuba Theme By
-                  Pixelstrap
+                  Copyright <span class="year-update"> </span> © MAD Mail Service By
+                  BLACKBOX
                 </p>
               </div>
             </div>
